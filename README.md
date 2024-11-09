@@ -9,15 +9,16 @@ Oasis is an interactive world model developed by [Decart](https://www.decart.ai/
 For more details, see our [joint blog post](https://oasis-model.github.io/) to learn more.
 
 And to use the most powerful version of the model, be sure to check out the [live demo](https://oasis.us.decart.ai/) as well!
-
+## !! CUDA >= 7.0 REQUIRED !!
 ## Setup
 ```
-git clone https://github.com/etched-ai/open-oasis.git
+git clone https://github.com/Hazielnetto/open-oasis.git
 cd open-oasis
 # Install pytorch
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
 # Install other dependencies
 pip install einops diffusers timm av
+pip install pygame
 ```
 
 ## Download the model weights
@@ -27,6 +28,7 @@ huggingface-cli login
 huggingface-cli download Etched/oasis-500m oasis500m.safetensors # DiT checkpoint
 huggingface-cli download Etched/oasis-500m vit-l-20.safetensors  # ViT VAE checkpoint
 ```
+(Maybe you will have to move the models (.safentesors) downloaded to the /open-oasis directory)
 
 ## Basic Usage
 We include a basic inference script that loads a prompt frame from a video and generates additional frames conditioned on actions.
