@@ -11,14 +11,17 @@ from torchvision.io import read_video
 from utils import sigmoid_beta_schedule
 from einops import rearrange
 from torch import autocast
+from safetensors.torch import load_model
 import pygame
 import numpy as np
+import os
 
 assert torch.cuda.is_available()
 device = "cuda:0"
 # Sampling params
-model_path = "oasis500m.pt"
-vae_path = "vit-l-20.pt"
+
+model_path = "oasis500m.safetensors"
+vae_path = "vit-l-20.safetensors"
 B = 1
 max_noise_level = 1000
 ddim_noise_steps = 16
@@ -166,16 +169,24 @@ pygame.event.set_grab(False)
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("Generated Video")
 
-# Load DiT checkpoint
-ckpt = torch.load(model_path)
+# load DiT checkpoint
 model = DiT_models["DiT-S/2"]()
-model.load_state_dict(ckpt, strict=False)
+print(f"loading Oasis-500M from oasis-ckpt={os.path.abspath(model_path)}...")
+if model_path.endswith(".pt"):
+    ckpt = torch.load(model_path, weights_only=True)
+    model.load_state_dict(ckpt, strict=False)
+elif model_path.endswith(".safetensors"):
+    load_model(model, model_path)
 model = model.to(device).half().eval()
 
-# Load VAE checkpoint
-vae_ckpt = torch.load(vae_path)
+# load VAE checkpoint
 vae = VAE_models["vit-l-20-shallow-encoder"]()
-vae.load_state_dict(vae_ckpt)
+print(f"loading ViT-VAE-L/20 from vae-ckpt={os.path.abspath(vae_path)}...")
+if vae_path.endswith(".pt"):
+    vae_ckpt = torch.load(vae_path, weights_only=True)
+    vae.load_state_dict(vae_ckpt)
+elif vae_path.endswith(".safetensors"):
+    load_model(vae, vae_path)
 vae = vae.to(device).half().eval()
 
 noise_range = torch.linspace(-1, max_noise_level - 1, ddim_noise_steps + 1).to(device)
